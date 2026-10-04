@@ -13,7 +13,8 @@ interface PriceData {
 const CropPricePrediction: React.FC = () => {
   const [selectedState, setSelectedState] = useState("All States");
   const [selectedCommodity, setSelectedCommodity] = useState("All Commodities");
-  const [priceData, setPriceData] = useState<PriceData[] | null>(null); // Use null initially to differentiate from empty array
+  const [priceData, setPriceData] = useState<PriceData[] | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const states = [
     "All States", "ANDHRA PRADESH", "CHHATTISGARH", "GUJARAT", "HARYANA", "HIMACHAL PRADESH",
@@ -40,87 +41,93 @@ const CropPricePrediction: React.FC = () => {
   ];
 
   const handleSubmit = async () => {
+    setLoading(true);
     try {
       const payload = {
         state: selectedState,
         commodity: selectedCommodity
       };
+      // Placeholder for your actual price API
       const response = await axios.post("http://localhost:5000/getdata", payload);
       setPriceData(response.data.data || []);
     } catch (error) {
       console.error("Error fetching data:", error);
-      setPriceData([]); // show empty in case of error
+      setPriceData([]);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="w-full flex justify-center items-center">
-      <div className="max-w-5xl mx-auto bg-[#ffffff21] my-[1rem] text-white rounded-lg shadow-lg p-8 text-center">
-        <div className="flex flex-col items-center mb-8">
-          <h1 className="text-3xl font-bold text-white">Crop Price Prediction</h1>
-          <p className="mt-2 text-white">
-            Get real-time agricultural commodity prices to make informed decisions for your farm business. <br />
-            Updated daily with market trends and forecasts.
-          </p>
-        </div>
+    <div className="w-full flex justify-center items-center py-[2rem]">
+      <div className="glass-card p-12 w-full max-w-5xl text-center">
+        <h2 className="section-title text-white">
+          Live Crop Prices
+        </h2>
+        <p className="section-subtitle mx-auto mb-10">
+          Get real-time agricultural commodity prices from APMCs across India to make informed trading decisions.
+        </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div className="flex flex-col text-left">
-            <label className="text-white font-medium mb-1">Select State</label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+          <div className="flex flex-col text-left gap-3">
+            <label className="text-[1.5rem] text-gray-300 font-medium">Select State</label>
             <select
-              className="bg-gray-800 text-white border border-gray-600 rounded-md p-2"
+              className="bg-[rgba(255,255,255,0.04)] border border-[rgba(82,183,136,0.3)] text-white text-[1.5rem] rounded-xl p-4 focus:outline-none focus:border-[#E9C46A] transition-all cursor-pointer"
               value={selectedState}
               onChange={(e) => setSelectedState(e.target.value)}
             >
-              {states.map(state => <option key={state}>{state}</option>)}
+              {states.map(state => <option className="bg-[#0B1D0F]" key={state}>{state}</option>)}
             </select>
           </div>
 
-          <div className="flex flex-col text-left">
-            <label className="text-white font-medium mb-1">Select Commodity</label>
+          <div className="flex flex-col text-left gap-3">
+            <label className="text-[1.5rem] text-gray-300 font-medium">Select Commodity</label>
             <select
-              className="bg-gray-800 text-white border border-gray-600 rounded-md p-2"
+              className="bg-[rgba(255,255,255,0.04)] border border-[rgba(82,183,136,0.3)] text-white text-[1.5rem] rounded-xl p-4 focus:outline-none focus:border-[#E9C46A] transition-all cursor-pointer"
               value={selectedCommodity}
               onChange={(e) => setSelectedCommodity(e.target.value)}
             >
-              {commodities.map(commodity => <option key={commodity}>{commodity}</option>)}
+              {commodities.map(commodity => <option className="bg-[#0B1D0F]" key={commodity}>{commodity}</option>)}
             </select>
           </div>
         </div>
 
         <button
           onClick={handleSubmit}
-          className="bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-6 rounded-md mb-8"
+          disabled={loading}
+          className="btn-primary w-full md:w-auto px-12 py-4 mb-10 disabled:opacity-70"
         >
-          Get Prices
+          {loading ? "Fetching Prices..." : "Get Market Prices"}
         </button>
 
-        {priceData !== null && priceData.length === 0 && (
-          <p className="text-red-400 font-semibold mt-4">No data available right now</p>
+        {priceData !== null && priceData.length === 0 && !loading && (
+          <div className="p-6 rounded-xl bg-[rgba(255,0,0,0.1)] border border-[rgba(255,0,0,0.2)]">
+            <p className="text-red-400 font-medium text-[1.6rem]">No price data available for the selected criteria at this moment.</p>
+          </div>
         )}
 
         {priceData && priceData.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="table-auto w-full text-left border-collapse border border-gray-600">
-              <thead className="bg-green-900">
+          <div className="overflow-x-auto rounded-xl border border-[rgba(82,183,136,0.2)]">
+            <table className="table-auto w-full text-left border-collapse text-[1.4rem]">
+              <thead className="bg-[rgba(45,106,79,0.5)] text-white">
                 <tr>
-                  <th className="border border-gray-600 px-4 py-2">APMC</th>
-                  <th className="border border-gray-600 px-4 py-2">State</th>
-                  <th className="border border-gray-600 px-4 py-2">Commodity</th>
-                  <th className="border border-gray-600 px-4 py-2">Min Price</th>
-                  <th className="border border-gray-600 px-4 py-2">Modal Price</th>
-                  <th className="border border-gray-600 px-4 py-2">Max Price</th>
+                  <th className="px-6 py-4 font-semibold border-b border-[rgba(82,183,136,0.2)]">APMC</th>
+                  <th className="px-6 py-4 font-semibold border-b border-[rgba(82,183,136,0.2)]">State</th>
+                  <th className="px-6 py-4 font-semibold border-b border-[rgba(82,183,136,0.2)]">Commodity</th>
+                  <th className="px-6 py-4 font-semibold border-b border-[rgba(82,183,136,0.2)] text-[#95D5B2]">Min Price (₹)</th>
+                  <th className="px-6 py-4 font-semibold border-b border-[rgba(82,183,136,0.2)] text-[#E9C46A]">Modal Price (₹)</th>
+                  <th className="px-6 py-4 font-semibold border-b border-[rgba(82,183,136,0.2)] text-[#D4A373]">Max Price (₹)</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-[rgba(82,183,136,0.1)]">
                 {priceData.map((entry, idx) => (
-                  <tr key={idx} className="bg-gray-800 hover:bg-gray-700">
-                    <td className="border border-gray-600 px-4 py-2">{entry["APMC's"]}</td>
-                    <td className="border border-gray-600 px-4 py-2">{entry.State}</td>
-                    <td className="border border-gray-600 px-4 py-2">{entry.Commodity}</td>
-                    <td className="border border-gray-600 px-4 py-2">{entry["Min Price"]}</td>
-                    <td className="border border-gray-600 px-4 py-2">{entry["Modal Price"]}</td>
-                    <td className="border border-gray-600 px-4 py-2">{entry["Max Price"]}</td>
+                  <tr key={idx} className="hover:bg-[rgba(255,255,255,0.05)] transition-colors">
+                    <td className="px-6 py-4 text-gray-300">{entry["APMC's"]}</td>
+                    <td className="px-6 py-4 text-gray-300">{entry.State}</td>
+                    <td className="px-6 py-4 font-medium text-white">{entry.Commodity}</td>
+                    <td className="px-6 py-4 text-[#95D5B2]">{entry["Min Price"]}</td>
+                    <td className="px-6 py-4 font-bold text-[#E9C46A]">{entry["Modal Price"]}</td>
+                    <td className="px-6 py-4 text-[#D4A373]">{entry["Max Price"]}</td>
                   </tr>
                 ))}
               </tbody>

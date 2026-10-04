@@ -1,130 +1,189 @@
+"use client";
+
 import axios from "axios";
 import React, { useState } from "react";
 
 const CropPrediction = () => {
-  const [nitrogen, setNitrogen] = useState("");
-  const [phosphorus, setPhosphorus] = useState("");
-  const [potassium, setPotassium] = useState("");
-  const [pH, setPH] = useState("");
-  const [moisture, setMoisture] = useState("");
-  const [temperature, setTemperature] = useState("");
-  const [rainfall, setrainfall] = useState("");
-  const [predictedCrop, setPredictedCrop] = useState("");
+  const [formData, setFormData] = useState({
+    nitrogen: "",
+    phosphorus: "",
+    potassium: "",
+    temperature: "",
+    humidity: "",
+    ph: "",
+    rainfall: "",
+  });
 
-  const handleSubmit = async(e: React.FormEvent) => {
+  const [predictedCrop, setPredictedCrop] = useState("");
+  const [confidence, setConfidence] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
+    setPredictedCrop("");
+    
     try {
-      const response = await axios.post("http://192.168.251.48:5000/predict",{
-        nitrogen: nitrogen,
-        phosphorus: phosphorus,
-        potassium:potassium ,
-        temperature: temperature,
-        humidity:moisture ,
-        ph: pH,
-        rainfall: rainfall
-    });
-      setPredictedCrop(response.data.prediction)
-      console.log(response);
-    } catch (error) {
-      console.log(error)
+      const response = await axios.post("http://localhost:8000/predict", {
+        nitrogen: parseFloat(formData.nitrogen),
+        phosphorus: parseFloat(formData.phosphorus),
+        potassium: parseFloat(formData.potassium),
+        temperature: parseFloat(formData.temperature),
+        humidity: parseFloat(formData.humidity),
+        ph: parseFloat(formData.ph),
+        rainfall: parseFloat(formData.rainfall),
+      });
+      
+      setPredictedCrop(response.data.prediction);
+      setConfidence(response.data.confidence);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to fetch prediction. Is the ML backend running?");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <>
-    <div className="bg-[#ffffff21] mt-[2rem] m-auto shadow-lg rounded-lg p-8 w-full max-w-xl">
-        <h2 className="text-2xl font-bold text-center text-white">
-          Soil Analysis & Crop Prediction
+    <div className="w-full flex justify-center items-center py-[2rem]">
+      <div className="glass-card p-12 w-full max-w-4xl text-center">
+        <h2 className="section-title text-white">
+          Smart Soil Analysis
         </h2>
-        <p className="text-center text-white mt-2 mb-6">
-          Enter your soil properties to get the most suitable crop recommendation
+        <p className="section-subtitle mx-auto mb-10">
+          Enter your soil properties and weather conditions to get the most suitable crop recommendation powered by Machine Learning.
         </p>
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
-          <input
-            type="number"
-            name="nitrogen"
-            placeholder="Nitrogen (N)"
-            value={nitrogen}
-            onChange={(e) => setNitrogen(e.target.value)}
-            required
-            className="border border-gray-300 rounded px-4 py-2"
-          />
-          <input
-            type="number"
-            name="phosphorus"
-            placeholder="Phosphorus (P)"
-            value={phosphorus}
-            onChange={(e) => setPhosphorus(e.target.value)}
-            required
-            className="border border-gray-300 rounded px-4 py-2"
-          />
-          <input
-            type="number"
-            name="potassium"
-            placeholder="Potassium (K)"
-            value={potassium}
-            onChange={(e) => setPotassium(e.target.value)}
-            required
-            className="border border-gray-300 rounded px-4 py-2"
-          />
-          <input
-            type="number"
-            name="pH"
-            placeholder="pH Level (0.0 - 14.0)"
-            value={pH}
-            onChange={(e) => setPH(e.target.value)}
-            required
-            className="border border-gray-300 rounded px-4 py-2"
-          />
-          <input
-            type="number"
-            name="moisture"
-            placeholder="Moisture (%)"
-            value={moisture}
-            onChange={(e) => setMoisture(e.target.value)}
-            required
-            className="border border-gray-300 rounded px-4 py-2"
-          />
-          <input
-            type="number"
-            name="temperature"
-            placeholder="Temperature (°C)"
-            value={temperature}
-            onChange={(e) => setTemperature(e.target.value)}
-            required
-            className="border border-gray-300 rounded px-4 py-2"
-          />
-          <input
-            type="number"
-            name="Rainfall"
-            placeholder="Rainfall in (mm) "
-            value={rainfall}
-            onChange={(e) => setrainfall(e.target.value)}
-            required
-            className="border border-gray-300 rounded px-4 py-2"
-          />
-          <div className="col-span-1 md:col-span-2 mt-4">
+
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+          <div className="flex flex-col gap-2">
+            <label className="text-[1.4rem] text-gray-300 font-medium">Nitrogen (N)</label>
+            <input
+              type="number"
+              name="nitrogen"
+              placeholder="e.g. 80"
+              value={formData.nitrogen}
+              onChange={handleChange}
+              required
+              className="bg-[rgba(255,255,255,0.04)] border border-[rgba(82,183,136,0.3)] text-white text-[1.5rem] rounded-xl p-4 focus:outline-none focus:border-[#E9C46A] transition-all"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-[1.4rem] text-gray-300 font-medium">Phosphorus (P)</label>
+            <input
+              type="number"
+              name="phosphorus"
+              placeholder="e.g. 40"
+              value={formData.phosphorus}
+              onChange={handleChange}
+              required
+              className="bg-[rgba(255,255,255,0.04)] border border-[rgba(82,183,136,0.3)] text-white text-[1.5rem] rounded-xl p-4 focus:outline-none focus:border-[#E9C46A] transition-all"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-[1.4rem] text-gray-300 font-medium">Potassium (K)</label>
+            <input
+              type="number"
+              name="potassium"
+              placeholder="e.g. 40"
+              value={formData.potassium}
+              onChange={handleChange}
+              required
+              className="bg-[rgba(255,255,255,0.04)] border border-[rgba(82,183,136,0.3)] text-white text-[1.5rem] rounded-xl p-4 focus:outline-none focus:border-[#E9C46A] transition-all"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-[1.4rem] text-gray-300 font-medium">pH Level (0-14)</label>
+            <input
+              type="number"
+              step="0.1"
+              name="ph"
+              placeholder="e.g. 6.5"
+              value={formData.ph}
+              onChange={handleChange}
+              required
+              className="bg-[rgba(255,255,255,0.04)] border border-[rgba(82,183,136,0.3)] text-white text-[1.5rem] rounded-xl p-4 focus:outline-none focus:border-[#E9C46A] transition-all"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-[1.4rem] text-gray-300 font-medium">Humidity (%)</label>
+            <input
+              type="number"
+              name="humidity"
+              placeholder="e.g. 82"
+              value={formData.humidity}
+              onChange={handleChange}
+              required
+              className="bg-[rgba(255,255,255,0.04)] border border-[rgba(82,183,136,0.3)] text-white text-[1.5rem] rounded-xl p-4 focus:outline-none focus:border-[#E9C46A] transition-all"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-[1.4rem] text-gray-300 font-medium">Temperature (°C)</label>
+            <input
+              type="number"
+              step="0.1"
+              name="temperature"
+              placeholder="e.g. 23"
+              value={formData.temperature}
+              onChange={handleChange}
+              required
+              className="bg-[rgba(255,255,255,0.04)] border border-[rgba(82,183,136,0.3)] text-white text-[1.5rem] rounded-xl p-4 focus:outline-none focus:border-[#E9C46A] transition-all"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2 md:col-span-2">
+            <label className="text-[1.4rem] text-gray-300 font-medium">Rainfall (mm)</label>
+            <input
+              type="number"
+              name="rainfall"
+              placeholder="e.g. 200"
+              value={formData.rainfall}
+              onChange={handleChange}
+              required
+              className="bg-[rgba(255,255,255,0.04)] border border-[rgba(82,183,136,0.3)] text-white text-[1.5rem] rounded-xl p-4 focus:outline-none focus:border-[#E9C46A] transition-all"
+            />
+          </div>
+
+          <div className="col-span-1 md:col-span-2 mt-6">
             <button
               type="submit"
-              className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded w-full"
+              disabled={loading}
+              className="btn-gold w-full flex justify-center items-center gap-4 py-4 disabled:opacity-70"
             >
-              Predict Crop
+              {loading ? "Analyzing..." : "Predict Optimal Crop"}
             </button>
           </div>
         </form>
 
-        {predictedCrop && (
-          <p className="mt-6 text-center text-green-700 font-semibold text-lg">
-            The recommended crop for your soil is:{" "}
-            <span className="text-white font-bold ">{predictedCrop}</span>
+        {error && (
+          <p className="mt-8 text-center text-red-400 font-medium text-[1.6rem]">
+            {error}
           </p>
         )}
 
-        <p className="text-xs text-white mt-4 text-center">
-          Last updated: May 1, 2025 | Soil Analysis & Crop Prediction Tool
-        </p>
+        {predictedCrop && (
+          <div className="mt-10 p-8 rounded-2xl bg-[rgba(212,163,115,0.1)] border border-[rgba(212,163,115,0.3)] animation-fadeInUp">
+            <h3 className="text-[1.8rem] text-gray-300 mb-2">Recommended Crop</h3>
+            <p className="text-[4rem] font-bold gradient-text-gold font-serif">
+              {predictedCrop}
+            </p>
+            <p className="text-[1.4rem] text-[#52B788] mt-2">
+              Confidence: {confidence}%
+            </p>
+          </div>
+        )}
       </div>
-    </>
+    </div>
   );
 };
 
