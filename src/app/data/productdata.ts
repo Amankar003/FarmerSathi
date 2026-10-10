@@ -1,8 +1,9 @@
+import type { StaticImageData } from "next/image";
 import Image1 from "@/assets/Image1.jpg"
 
 interface ProductData {
     id: number;
-    img: any;
+    img: StaticImageData;
     productname: string;
     price: number;
     desc: string;

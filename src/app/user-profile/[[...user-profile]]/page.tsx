@@ -1,11 +1,11 @@
 'use client'
 
-import Navbar from '@/components/Navbar'
+import Header from '@/components/sathi/Header'
 import { SignOutButton, UserProfile } from '@clerk/nextjs'
 
 const UserProfilePage = () => (
  <>
-    <Navbar/>
+    <Header/>
     <div className='flex justify-center items-center  w-full my-[2rem] flex-col ' >
     <div className='w-[80%] flex justify-end  '>
                     <SignOutButton>

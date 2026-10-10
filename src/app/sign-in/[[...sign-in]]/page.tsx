@@ -1,10 +1,10 @@
 import React from 'react'
-import Navbar from '@/components/Navbar';
+import Header from '@/components/sathi/Header';
 import { SignIn  } from '@clerk/nextjs'
 const page = () => {
   return (
     <>
-        <Navbar/>
+        <Header/>
         <div className='flex justify-center items-center  w-full my-[2rem] ' >
             <SignIn  appearance={
                 {

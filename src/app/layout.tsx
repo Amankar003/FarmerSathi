@@ -1,13 +1,29 @@
 import type { Metadata } from "next";
+import { Lilita_One, Poppins, Caveat } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 
+const lilita = Lilita_One({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-lilita",
+});
+
+const poppins = Poppins({
+  weight: ["400", "500", "600", "700"],
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-poppins",
+});
+
+const caveat = Caveat({
+  weight: ["700"],
+  subsets: ["latin"],
+  variable: "--font-caveat",
+});
+
 export const metadata: Metadata = {
-  title: "FarmerSaathi - Smart Farming Companion | AI-Powered Agriculture",
-  description:
-    "FarmerSaathi empowers Indian farmers with AI-powered crop predictions, disease detection, live market prices, and smart agricultural solutions. Your digital farming companion.",
-  keywords:
-    "farming, agriculture, crop prediction, crop disease detection, AI farming, Indian farmers, soil analysis, FarmerSaathi",
+  title: "FarmerSathi - Kheti me Madad Chahiye?",
+  description: "FarmerSathi connects Indian farmers with agriculture experts instantly. Apna expert dhundho!",
 };
 
 export default function RootLayout({
@@ -17,16 +33,10 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
-        <head>
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link
-            rel="preconnect"
-            href="https://fonts.gstatic.com"
-            crossOrigin="anonymous"
-          />
-        </head>
-        <body>{children}</body>
+      <html lang="en" className={`${lilita.variable} ${poppins.variable} ${caveat.variable}`}>
+        <body className="antialiased">
+          {children}
+        </body>
       </html>
     </ClerkProvider>
   );

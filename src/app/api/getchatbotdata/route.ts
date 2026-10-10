@@ -44,7 +44,7 @@ const context = {
     "fallback": "I'm here to assist with farming-related queries and about how our website helps farmers. Please ask me about crops, prices, or farming advice!"
   }
 
-  export const POST = async (req: any) => {
+  export const POST = async (req: Request) => {
     const { query } = await req.json();
   
     const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_API_Gemni_Api_key });
@@ -75,10 +75,10 @@ const context = {
         success: true,
         answer: replyText,
       });
-    } catch (error) {
+    } catch {
       return NextResponse.json({
         success: false,
-        error: error || "कुछ गलत हो गया।"
+        error: "कुछ गलत हो गया।"
       });
     }
   };
